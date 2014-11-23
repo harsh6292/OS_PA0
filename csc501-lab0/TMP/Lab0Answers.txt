@@ -1,0 +1,71 @@
+Harshvardhan Aggarwal  - - haggarw
+
+
+1. Assuming the XINU text begins at address 0x0, draw a rough diagram of XINU's memory layout with addresses derived from your experimental measurements. Include the information you uncovered from running your version of printsegaddress() and printprocstks().
+
+Ans.
+
+				edata = 0x0000bpe0		                        limit = 0x00ffdffc           esp = 0x00ffefec    
+0					  V				                     V	                             V
+|____text_________|_______data__________|__________bss__________|__heap___|____free______|___________stack_memory_______________main_____________________|
+		   ^						    ^				                                                              ^
+	etext = 0x000092c6				     end = 0x00015598			                                                  base = 0x00ffeff8
+
+
+2. What is the difference in stack top address before and after calling printtos() ? Draw a diagram to illustrate what are the contents of the items pushed into the stack between these two time points.
+
+Ans. Using printtos() function, the stack pointer before calling printtos() was : 0x00ffefc0.
+     The stack pointer right after calling printtos() was : 0x00ffefb8.
+     The difference between these two values is 8 bytes. The difference is because the base pointer of the main function is stored  and the return address to main function is stored in these 8 bytes.
+
+	|		    |
+	|		    |
+	|		    |
+	|   main function  |
+	|__________________|
+	|return address    |
+	|to main           |
+	|__________________|
+	|base pointer of   |
+	|main function     |
+	|__________________|
+	|callee function   |
+	|__________________|
+	| 		    |
+	|                  |
+
+
+3. Which byte order is adopted in the host machine that we are using ? How did you find out ?
+
+Ans. The byte order adapted in XINU is Little-endian. We can take an integer value like 2 and take its reference as a pointer in character value (hence it will have value 00000010 in binary). Then we can print the pointer value and see if the 0010 is in lower byte order or in upper byte order. If it is in lower byte order, then it is in little-endian format.
+
+	e.g. program
+			int i=2;
+			char *ptr=&i;
+			print *ptr;
+
+4. Briefly describe the mov, push, pusha, pop, and popa instructions in the x86.
+
+Ans. The instruction in x86 are described as:
+
+	mov: It moves the contents of source register into destination register. The instruction is written as:
+		mov destination, source
+
+	push: It pushes the contents given as arguments onto the stack. The stack pointer decreases by 4 bytes. The instruction is written as:
+		push %ebp
+
+		it will move the contents of ebp register onto the stack.
+
+	pusha: It pushes the contents of all general-purpose registers (the 16-bit registers are pushed) onto the stack in a particular order: AX, CX, DX, BX, SP, BP, SI and DI. The stack pointer in this case decreases by 2 bytes.
+
+	pop: It pops out i.e. it removes the contents (4bytes) from the stack which are located at current stack pointer. It moves the data to the register or memory location. The instruction is written as:
+		pop register
+		pop [memory]
+
+	popa: It pops out or removes contents ( 2 bytes) from the current stack pointer but it does in opposite order as push does i.e register are popped out in order as : DI, SI, BP, SP, BX, DX, CX, and AX.
+
+
+
+5. In a stack frame, local variables are stored below the top of the stack. In task 3, does your result show all the local variables declared in your printtos function? If not, can you explain that? (hint: try to disable the compiler optimization by specifying -O0 in your Makefile)
+
+Ans. No, the result of printtos() does not show all the variables declared. The compiler pushes data in 2 locations before variables are pushed i.e. it shows data as 0 in those two locations. After these two locations only, the variables can be seen.
